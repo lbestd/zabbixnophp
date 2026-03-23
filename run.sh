@@ -11,4 +11,4 @@ fi
 
 export ZBX_DB_DSN="${ZBX_DB_DSN:-postgresql://zabbix:zabbix@localhost/zabbix}"
 
-exec .venv/bin/uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
+exec .venv/bin/python -m api.main

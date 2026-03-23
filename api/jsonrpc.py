@@ -4,8 +4,7 @@ JSON-RPC 2.0 dispatcher — Zabbix-compatible error codes.
 from __future__ import annotations
 import json
 from typing import Any
-from fastapi import Request
-from fastapi.responses import JSONResponse
+from aiohttp.web import Request
 
 from . import session as sess
 from . import rbac
@@ -54,11 +53,11 @@ def _err(code: int, message: str, data: str, req_id: Any) -> dict:
 _public = {"user.login", "apiinfo.version", "user.checkAuthentication"}
 
 
-async def dispatch(request: Request) -> JSONResponse:
+async def dispatch(request: Request) -> dict | list:
     try:
         body = await request.json()
     except Exception:
-        return JSONResponse(_err(-32700, "Parse error", "", None))
+        return _err(-32700, "Parse error", "", None)
 
     # batch support
     is_batch = isinstance(body, list)
@@ -106,4 +105,4 @@ async def dispatch(request: Request) -> JSONResponse:
         except Exception as e:
             responses.append(_err(ERR_INTERNAL, "Internal error.", str(e), req_id))
 
-    return JSONResponse(responses if is_batch else responses[0])
+    return responses if is_batch else responses[0]
