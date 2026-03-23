@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 event.get  — query the events table.
 event.acknowledge — write to acknowledges, update problem/events.acknowledged.

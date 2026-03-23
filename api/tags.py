@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Shared tag-filtering helper for host.get, item.get, trigger.get, event.get, problem.get.
 

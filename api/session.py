@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Session management using Zabbix native sessions table.
 Tokens are the 32-char sessionid stored in that table,

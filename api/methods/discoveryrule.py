@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 discoveryrule.get/create/update/delete — LLD rules (items.flags=1).
 Also serves filter conditions via item_condition and lld_macro_path.

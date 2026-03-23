@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 trigger.get / trigger.create / trigger.update / trigger.delete
 

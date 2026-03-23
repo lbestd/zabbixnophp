@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Extra API methods needed for Grafana Zabbix plugin compatibility:
   application.get  — stub (removed in Zabbix 5.4+, returns [])

@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 usermacro.get/create/update/delete  — host-level macros (hostmacro table)
 globalmacro.get/create/update/delete — global macros (globalmacro table)

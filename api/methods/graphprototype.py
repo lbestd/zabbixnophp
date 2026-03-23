@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 graphprototype.get — graph prototypes (graphs linked to item prototypes).
 graphs.flags doesn't exist; prototype graphs are linked via graphs_items → items.flags=2.

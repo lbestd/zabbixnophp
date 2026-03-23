@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 itemprototype.get/create/update/delete — items.flags=2,
 linked to LLD rules via item_discovery.parent_itemid.

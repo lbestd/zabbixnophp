@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 template.get/create/update/delete — Zabbix templates (hosts with status=3).
 """

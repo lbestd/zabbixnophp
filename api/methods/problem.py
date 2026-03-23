@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 problem.get — active problems from the `problem` table.
 

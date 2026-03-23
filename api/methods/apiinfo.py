@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..jsonrpc import register
 from ..config import API_VERSION
 

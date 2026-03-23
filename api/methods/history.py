@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 history.get — raw history values.
 

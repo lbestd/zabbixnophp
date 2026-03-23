@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..db import pool
 from ..ids import next_id
 from ..jsonrpc import register, ApiError, ERR_PARAMETERS, ERR_NO_ENTITY

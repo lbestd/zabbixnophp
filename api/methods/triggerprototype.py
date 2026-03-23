@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 triggerprototype.get/create/update/delete — triggers.flags=2.
 Linked to LLD rules via functions → items → item_discovery.parent_itemid.

@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 item.get / item.create / item.update / item.delete
 
