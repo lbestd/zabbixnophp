@@ -19,7 +19,7 @@ Zabbix — отличная система мониторинга. Демон н
 
 | Слой | Технология | Зачем |
 |------|-----------|-------|
-| Сервер | **FastAPI + uvicorn** | Async, быстро, без церемоний |
+| Сервер | **aiohttp** | Async, без лишних слоёв |
 | БД | **asyncpg** | Прямой PostgreSQL, никакого ORM |
 | Auth | **bcrypt** | Хэши паролей как у Zabbix — совместимость |
 | Frontend | **Vanilla JS ES modules** | Ноль зависимостей, ноль сборки |
@@ -36,7 +36,13 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 
 ZBX_DB_DSN=postgresql://zabbix:password@localhost/zabbix \
-  .venv/bin/uvicorn api.main:app --host 0.0.0.0 --port 8090
+  .venv/bin/python -m api.main
+```
+
+Или через скрипт — он сам создаст venv если его нет:
+
+```bash
+ZBX_DB_DSN=postgresql://zabbix:password@localhost/zabbix ./run.sh
 ```
 
 Порт `8090`. Zabbix-демон не трогаем. База данных та же самая.
@@ -48,7 +54,7 @@ ZBX_DB_DSN=postgresql://zabbix:password@localhost/zabbix \
 ```
 .
 ├── api/                        # Python backend
-│   ├── main.py                 # FastAPI app, CORS, статика
+│   ├── main.py                 # aiohttp app, роуты, статика
 │   ├── jsonrpc.py              # Диспетчер JSON-RPC 2.0
 │   ├── db.py                   # Пул соединений asyncpg
 │   ├── session.py              # Аутентификация через таблицу sessions
