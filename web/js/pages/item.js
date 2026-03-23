@@ -208,8 +208,12 @@ function renderSvgMulti(seriesList, stacked) {
   const gW = W - PAD.left - PAD.right;
   const gH = H - PAD.top  - PAD.bottom;
 
-  const allTs = seriesList.flatMap(s => s.points.map(p => p.t));
-  const tMin  = Math.min(...allTs), tMax = Math.max(...allTs);
+  // Avoid Math.min/max(...largeArray) — spread hits stack limit with many series × points
+  let tMin = Infinity, tMax = -Infinity;
+  for (const s of seriesList) for (const p of s.points) {
+    if (p.t < tMin) tMin = p.t;
+    if (p.t > tMax) tMax = p.t;
+  }
   const tRange = tMax - tMin || 1;
   const px = t => PAD.left + ((t - tMin) / tRange) * gW;
 
@@ -217,6 +221,8 @@ function renderSvgMulti(seriesList, stacked) {
 
   if (stacked) {
     // Build time-aligned stacked data (union of all timestamps, nearest-neighbor fill)
+    const allTs = [];
+    for (const s of seriesList) for (const p of s.points) allTs.push(p.t);
     const times   = [...new Set(allTs)].sort((a, b) => a - b);
     const aligned = seriesList.map(s => times.map(t => nearestValue(s.points, t)));
     // cumul[ti][si] = cumulative sum of series 0..si at time index ti
@@ -225,14 +231,18 @@ function renderSvgMulti(seriesList, stacked) {
       return seriesList.map((_, si) => { sum += aligned[si][ti]; return sum; });
     });
     vMin = 0;
-    vMax = Math.max(...cumul.map(row => row[row.length - 1])) || 1;
+    let stackMax = 0;
+    for (const row of cumul) { const v = row[row.length - 1]; if (v > stackMax) stackMax = v; }
+    vMax = stackMax || 1;
     const vRange = vMax - vMin;
     py = v => PAD.top + gH - ((v - vMin) / vRange) * gH;
     stackedData = { times, cumul };
   } else {
-    const allVals = seriesList.flatMap(s => s.points.map(p => p.v));
-    vMin = Math.min(...allVals);
-    vMax = Math.max(...allVals);
+    vMin = Infinity; vMax = -Infinity;
+    for (const s of seriesList) for (const p of s.points) {
+      if (p.v < vMin) vMin = p.v;
+      if (p.v > vMax) vMax = p.v;
+    }
     const vRange = vMax - vMin || 1;
     py = v => PAD.top + gH - ((v - vMin) / vRange) * gH;
   }
@@ -356,10 +366,11 @@ function renderSvgChart(points, units, isTrend) {
   const gW = W - PAD.left - PAD.right;
   const gH = H - PAD.top  - PAD.bottom;
 
-  const ts   = points.map(p => p.t);
-  const vals = points.map(p => p.v);
-  const tMin = Math.min(...ts),  tMax = Math.max(...ts);
-  let   vMin = Math.min(...vals), vMax = Math.max(...vals);
+  let tMin = Infinity, tMax = -Infinity, vMin = Infinity, vMax = -Infinity;
+  for (const p of points) {
+    if (p.t < tMin) tMin = p.t; if (p.t > tMax) tMax = p.t;
+    if (p.v < vMin) vMin = p.v; if (p.v > vMax) vMax = p.v;
+  }
 
   if (isTrend) {
     vMin = Math.min(vMin, ...points.map(p => p.min));

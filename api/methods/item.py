@@ -25,7 +25,9 @@ async def _enrich_last_values(result: dict) -> None:
     """Fill lastclock/lastns/lastvalue/prevvalue by querying history tables.
 
     Limits to the last 7 days (HISTORY_PERIOD) to avoid full table scans.
-    Uses a window function to fetch at most 2 rows per item efficiently.
+    Uses LATERAL with LIMIT 2 per item so the planner always uses the
+    (itemid, clock) index — avoids the nondeterministic plan that a global
+    window-function query produces on large installations.
     """
     import time as _time
     time_from = int(_time.time()) - _HISTORY_PERIOD
@@ -40,20 +42,26 @@ async def _enrich_last_values(result: dict) -> None:
         if not table:
             continue
         rows = await pool().fetch(
-            f"""SELECT itemid, clock, ns, v, rn FROM (
-                  SELECT itemid, clock, ns, value::text AS v,
-                         row_number() OVER (PARTITION BY itemid
-                                            ORDER BY clock DESC, ns DESC) AS rn
+            f"""SELECT u.itemid, h.clock, h.ns, h.v
+                FROM unnest($1::bigint[]) AS u(itemid)
+                CROSS JOIN LATERAL (
+                  SELECT clock, ns, value::text AS v
                   FROM {table}
-                  WHERE itemid = ANY($1::bigint[]) AND clock >= $2
-                ) t WHERE rn <= 2""",
+                  WHERE itemid = u.itemid AND clock >= $2
+                  ORDER BY clock DESC, ns DESC
+                  LIMIT 2
+                ) h""",
             ids, time_from,
         )
+        # rows arrive in (itemid, clock DESC) order;
+        # first occurrence per itemid = latest, second = previous
+        seen: set[str] = set()
         for r in rows:
             iid = str(r["itemid"])
             if iid not in result:
                 continue
-            if r["rn"] == 1:
+            if iid not in seen:
+                seen.add(iid)
                 result[iid]["lastclock"] = str(r["clock"])
                 result[iid]["lastns"]    = str(r["ns"])
                 result[iid]["lastvalue"] = r["v"]
